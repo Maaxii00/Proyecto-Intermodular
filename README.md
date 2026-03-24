@@ -37,9 +37,13 @@ python visualizacion.py
 
 # Funcionalidades implementadas
 ✅ Creación de la arquitectura de la Red Neuronal (DQN) con capas lineales.
+
 ✅ Inicialización del entorno gráfico CartPole-v1 mediante Gymnasium.
+
 ✅ Captura del estado del entorno y conversión a tensores de PyTorch.
+
 ✅ Bucle de juego funcional donde el agente toma decisiones (pesos aleatorios).
+
 ✅ Documentación técnica en el código fuente.
 
 # Funcionalidades pendientes
