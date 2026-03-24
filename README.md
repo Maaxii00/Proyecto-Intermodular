@@ -54,5 +54,7 @@ python visualizacion.py
 
 ⏳ Guardar y cargar modelos entrenados (.pth).
 
+⏳ Realizar pruebas unitarias.
+
 # Autor
 Maximiliano González Segura - 2º DAM
