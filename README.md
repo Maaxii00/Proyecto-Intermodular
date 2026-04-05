@@ -46,6 +46,10 @@ python visualizacion.py
 
 ✅ Documentación técnica en el código fuente.
 
+✅ Clase Agente (Toma de decisiones).
+
+✅ Clase Memoria.
+
 # Funcionalidades pendientes
 
 ⏳ Implementar el algoritmo de entrenamiento (cálculo de recompensas, función de pérdida y optimizador).
