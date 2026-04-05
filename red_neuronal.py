@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+# Arquitectura base DQN
+
 class DQN(nn.Module):
     def __init__(self, input_shape, n_actions):
         # Heredamos de nn.Module, que es lo que nos da PyTorch para poder crear redes neuronales
