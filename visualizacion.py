@@ -1,51 +1,48 @@
 import gymnasium as gym
-import torch
 import time
-from red_neuronal import DQN
+from agente import Agente
 
 def mirar_agente_jugar():
-    # Importante: el render_mode="human" es para que abra la ventanita con los gráficos
+    # Iniciamos el entorno gráfico
     env = gym.make("CartPole-v1", render_mode="human")
 
-    # Saco los tamaños de las entradas y salidas dinámicamente
+    # Sacamos las dimensiones dinámicamente
     input_dim = env.observation_space.shape[0] 
     n_actions = env.action_space.n              
     
-    # Cargo la red neuronal vacía
-    model = DQN(input_dim, n_actions)
+    # Creamos a nuestro jugador (Agente). Él ya se encarga de crear su propio cerebro (DQN) por dentro.
+    jugador = Agente(input_dim, n_actions)
     
-    # Pongo la red en modo evaluación 
-    model.eval()
+    # Para la visualización, no queremos que explore haciendo locuras, 
+    # queremos que use lo que sabe (aunque ahora mismo sepa poco).
+    jugador.probabilidad_aleatoria = 0.0 
+    jugador.cerebro.eval() # Modo evaluación
 
-    episodios = 5  # Vueltas que quiero ver
+    episodios = 5  
     
     for episodio in range(episodios):
-        state, info = env.reset() # Reseteo el entorno para empezar limpio
+        state, info = env.reset()
         terminado = False
         puntos = 0
         
         print(f"Preparando episodio {episodio + 1}")
-        time.sleep(2) # Pausa de 2 segundos al inicio de la partida con la pantalla congelada
+        time.sleep(2) 
         
         while not terminado:
-            # Convierto el array de numpy que me da el juego a un Tensor
+            # Ahora es el Agente quien elige la acción, el código queda mucho más limpio
+            import torch
             state_tensor = torch.FloatTensor(state).unsqueeze(0)
             
-            with torch.no_grad(): 
-                q_values = model(state_tensor)
+            # Le pedimos al agente que decida
+            action = jugador.elegir_accion(state_tensor)
             
-            # Cojo la acción que la red cree que es mejor
-            action = torch.argmax(q_values).item()
-            
-            # Le paso la acción al juego
+            # El entorno reacciona a la acción del agente
             next_state, reward, terminated, truncated, info = env.step(action)
             
-            # Actualizo variables
             state = next_state
             puntos += 1
             terminado = terminated or truncated
 
-            # Le metemos 0.1 o 0.2 segundos de delay para que los movimientos se aprecien
             time.sleep(0.1)
 
         print(f"Episodio {episodio + 1}: El agente ha aguantado {puntos} pasos.")
