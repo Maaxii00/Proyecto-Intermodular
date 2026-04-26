@@ -1,4 +1,4 @@
-# Agente Inteligente CartPole (DQN) - Proyecto Intermodular
+# Agente Inteligente CartPole
 
 Este proyecto es el módulo de Inteligencia Artificial (IA) del Proyecto Intermodular. Consiste en el desarrollo de un agente basado en Aprendizaje por Refuerzo (Reinforcement Learning) utilizando una arquitectura Deep Q-Network (DQN). El sistema permite al agente aprender de forma autónoma a balancear un péndulo invertido sobre un carro móvil dentro del entorno de simulación CartPole (Gymnasium).
 
@@ -49,7 +49,7 @@ Ejecuta la batería de tests para comprobar la integridad de las clases POO.
 * **Credenciales de prueba:** El sistema de simulación no requiere login, autenticación JWT ni base de datos externa por el momento.
 * **Hiperparámetros:** Variables como `learning_rate`, `batch_size` o `episodios` se pueden configurar directamente en los constructores de las clases dentro del código fuente.
 
-## Funcionalidades implementadas (80% Operativo)
+## Funcionalidades implementadas
 * ✅ **Arquitectura DQN:** Red neuronal multicapa programada con PyTorch.
 * ✅ **Programación Orientada a Objetos (POO):** Clases estructuradas (`Agente`, `Memoria`, `Entrenador`) siguiendo el diagrama UML del proyecto.
 * ✅ **Gestión de Memoria (Replay Buffer):** Almacenamiento circular de experiencias pasadas para entrenar en lotes aleatorios.
