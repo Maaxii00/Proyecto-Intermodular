@@ -1,6 +1,6 @@
 import torch
 import gymnasium as gym
-from red_neuronal import DQN 
+from src.red_neuronal import DQN 
 
 # Monto la configuración básica sacando los datos del propio juego
 env = gym.make("CartPole-v1")
@@ -10,7 +10,7 @@ n_actions = env.action_space.n             # Pilla las 2 acciones posibles
 # Instancio mi red neuronal con esos datos
 mi_cerebro = DQN(input_dim, n_actions)
 
-print("--- Estructura de mi Red Neuronal ---")
+print("Estructura de mi Red Neuronal")
 print(mi_cerebro)
 
 # Meto datos random para probar si la red no peta antes de conectarla al juego real.
