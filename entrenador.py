@@ -20,8 +20,7 @@ class Entrenador:
         self.historial_puntos = []
 
     def entrenar(self):
-        print("Iniciando el entrenamiento de la IA...")
-        
+        print("Iniciando el entrenamiento")
         for episodio in range(self.episodios):
             estado, _ = self.env.reset()
             terminado = False
