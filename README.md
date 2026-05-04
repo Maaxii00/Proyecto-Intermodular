@@ -8,6 +8,7 @@ Este proyecto es el módulo de Inteligencia Artificial (IA) del Proyecto Intermo
 * **Simulación de Entorno:** Gymnasium (Farama Foundation) 0.29.1
 * **Motor Gráfico:** pygame-ce
 * **Análisis y Métricas:** Matplotlib 3.8+
+* **Interacción manual:** `keyboard`
 * **Testing:** `unittest` (Librería nativa de Python)
 
 ## Requisitos previos
@@ -26,43 +27,37 @@ Abre tu terminal y ejecuta los siguientes comandos paso a paso:
 2. Accede a la carpeta del proyecto:
 > `cd Proyecto-Intermodular`
 
-3. Instala las dependencias necesarias:
-> `pip install torch gymnasium[classic_control] pygame-ce matplotlib`
+3. Instala todas las dependencias necesarias:
+> `pip install torch gymnasium[classic_control] pygame-ce matplotlib keyboard`
 
 ## Instrucciones de ejecución
-El proyecto cuenta con varios scripts según lo que se desee probar. Recuerda ejecutarlos desde la carpeta raíz.
+El proyecto se ha unificado bajo un único punto de entrada interactivo. Asegúrate de ejecutarlo desde el directorio raíz del proyecto.
 
-**A) Iniciar el Entrenamiento de la IA:**
-Inicia el bucle de aprendizaje. Al finalizar, genera un archivo de pesos y una gráfica.
-> `python src/entrenador.py`
+**A) Iniciar la Aplicación Principal:**
+> `python main.py`
 
-**B) Visualizar al Agente en el entorno:**
-Abre la interfaz gráfica para ver cómo la IA toma decisiones en tiempo real usando el motor Pygame.
-> `python src/visualizacion.py`
+Al ejecutar este comando, se desplegará un menú en consola con las siguientes opciones:
+1. **Entrenar IA desde cero:** Inicia un nuevo bucle de aprendizaje.
+2. **Entrenamiento Continuo (Fine-Tuning):** Carga un modelo guardado previamente (`.pth`) para perfeccionar su técnica sin perder la memoria.
+3. **Visualizar Agente:** Abre el entorno gráfico de Pygame para ver a la IA jugar a velocidad normal usando el modelo entrenado.
+4. **Jugar Manualmente:** Habilita el control humano mediante las flechas del teclado para comparar la dificultad del nivel frente a la IA.
 
-**C) Ejecutar las Pruebas Unitarias:**
-Ejecuta la batería de tests para comprobar la integridad de las clases POO.
-> `python -m unittest tests/tests.py`
+**B) Ejecutar las Pruebas Unitarias:**
+Ejecuta la batería completa de tests para comprobar la integridad de las clases del sistema.
+> `python -m unittest discover tests -v`
 
-## Configuración necesaria
-* **Variables de entorno:** No se requieren `.env` para la simulación local.
-* **Credenciales de prueba:** El sistema de simulación no requiere login, autenticación JWT ni base de datos externa por el momento.
-* **Hiperparámetros:** Variables como `learning_rate`, `batch_size` o `episodios` se pueden configurar directamente en los constructores de las clases dentro del código fuente.
+## Funcionalidades implementadas (100% Operativo)
+* ✅ **Arquitectura DQN:** Red neuronal multicapa (MLP) programada con PyTorch.
+* ✅ **Sistema de Menú Interactivo:** CLI completa para gestionar los diferentes modos de ejecución sin tocar el código.
+* ✅ **Carga y Guardado Dinámico:** El modelo se guarda automáticamente en disco (`models/cerebro_cartpole.pth`) al superar el nivel o terminar los episodios, y puede cargarse posteriormente.
+* ✅ **Gestión de Memoria (Replay Buffer):** Almacenamiento circular de experiencias pasadas para entrenar en lotes aleatorios, evitando el olvido catastrófico.
+* ✅ **Métricas y Análisis:** Generación automática de gráficas de la curva de aprendizaje (Puntos vs Episodios).
+* ✅ **Testing y Modularidad:** Código 100% orientado a objetos y testeado mediante pruebas unitarias modulares.
+* ✅ **Prevención de Sobreajuste (Early Stopping):** El entrenamiento se detiene automáticamente si la IA logra 10 partidas perfectas consecutivas.
 
-## Funcionalidades implementadas (80% Operativo)
-* ✅ **Arquitectura DQN:** Red neuronal multicapa programada con PyTorch.
-* ✅ **Programación Orientada a Objetos (POO):** Clases estructuradas (`Agente`, `Memoria`, `Entrenador`) siguiendo el diagrama UML del proyecto.
-* ✅ **Gestión de Memoria (Replay Buffer):** Almacenamiento circular de experiencias pasadas para entrenar en lotes aleatorios.
-* ✅ **Bucle de Entrenamiento:** Lógica matemática de recompensa/castigo, cálculo de pérdida (MSE) y optimización de pesos (Adam).
-* ✅ **Métricas:** Generación automática de gráficas de la curva de aprendizaje.
-* ✅ **Testing:** Pruebas unitarias de las clases core del sistema.
-
-## Funcionalidades pendientes
-* ⏳ **Carga dinámica de modelos:** Lograr que `visualizacion.py` lea automáticamente el archivo de pesos entrenado para que el agente juegue como un experto, en lugar de instanciar una red vacía.
-* ⏳ **Integración Intermodular:** Posible conexión de los resultados y métricas del agente con el módulo de Sistemas de Gestión Empresarial.
-
-## Problemas conocidos
-* 🐛 En entornos WSL (Windows Subsystem for Linux) o servidores sin interfaz gráfica, la librería `pygame-ce` puede lanzar un error "Headless" al no poder abrir la ventana de visualización. Se soluciona ejecutando el código desde CMD/PowerShell en Windows nativo.
+## Problemas conocidos y Soluciones
+* 🐛 **Error Headless (WSL/Servidores):** En entornos WSL (Windows Subsystem for Linux) o servidores sin interfaz gráfica, `pygame-ce` puede lanzar un error al no poder abrir la ventana de visualización. **Solución:** Ejecutar el código desde CMD/PowerShell en Windows nativo.
+* 🐛 **El teclado no responde en Modo Manual:** La librería `keyboard` lee pulsaciones a nivel de sistema, lo que a veces requiere privilegios elevados. **Solución:** Ejecutar la terminal de VS Code (o PowerShell) como Administrador.
 
 ## Capturas de pantalla
 

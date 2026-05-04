@@ -1,48 +1,50 @@
 import gymnasium as gym
-import time
 import torch
+import os
+import time
 from src.agente import Agente
 
-def mirar_agente_jugar():
-    env = gym.make("CartPole-v1", render_mode="human")
+def visualizar_agente():
+    try:
+        env = gym.make("CartPole-v1", render_mode="human")
+    except Exception as e:
+        print(f"Error al inicializar el entorno visual: {e}")
+        return
+    
+    estados = env.observation_space.shape[0]
+    acciones = env.action_space.n
+    agente = Agente(estados, acciones)
 
-    input_dim = env.observation_space.shape[0] 
-    n_actions = env.action_space.n              
+    ruta_modelo = "models/cerebro_cartpole.pth"
     
-    jugador = Agente(input_dim, n_actions)
-    
-    # ¡AQUÍ ESTÁ LA CLAVE! 
-    # Le inyectamos los conocimientos matemáticos que el entrenador guardó en el archivo .pth
-    jugador.cerebro.load_state_dict(torch.load("cerebro_cartpole.pth", weights_only=True))
-    
-    # Le decimos al agente que NO explore haciendo cosas al azar, que use 100% lo que sabe
-    jugador.probabilidad_aleatoria = 0.0 
-    jugador.cerebro.eval() 
+    try:
+        if os.path.exists(ruta_modelo):
+            print(f"Modelo encontrado correctamente, cargandose desde: {ruta_modelo}")
+            agente.cargar_modelo(ruta_modelo)
+            agente.probabilidad_aleatoria = 0.0 
+        else:
+            print("No se encontró ningún modelo entrenado. El agente jugará de forma novata (De forma aleatoria).")
+    except Exception as e:
+         print(f"Error crítico al cargar los pesos del modelo: {e}")
+         return
 
-    episodios = 5  
-    
-    for episodio in range(episodios):
-        state, info = env.reset()
+    try:
+        estado, _ = env.reset()
         terminado = False
+        truncado = False
         puntos = 0
+
+        print("Iniciando simulación...")
         
-        print(f"Preparando episodio {episodio + 1}")
-        time.sleep(2) 
-        
-        while not terminado:
-            state_tensor = torch.FloatTensor(state).unsqueeze(0)
-            action = jugador.elegir_accion(state_tensor)
-            
-            next_state, reward, terminated, truncated, info = env.step(action)
-            state = next_state
-            puntos += 1
-            terminado = terminated or truncated
+        while not (terminado or truncado):
+            estado_tensor = torch.FloatTensor(estado).unsqueeze(0)
+            accion = agente.elegir_accion(estado_tensor)
+            estado, recompensa, terminado, truncado, _ = env.step(accion)
+            puntos += recompensa
+            time.sleep(0.02) 
 
-            time.sleep(0.05) # Un poquito más rápido para que veas cómo lo equilibra
-
-        print(f"Episodio {episodio + 1}: El agente ha aguantado {puntos} pasos.")
-
-    env.close() 
-
-if __name__ == "__main__":
-    mirar_agente_jugar()
+        print(f"Simulación terminada. Puntuación conseguida: {puntos}")
+    except Exception as e:
+        print(f"La simulación se interrumpió inesperadamente: {e}")
+    finally:
+        env.close()

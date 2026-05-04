@@ -3,12 +3,18 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import matplotlib.pyplot as plt
+import os
 from src.agente import Agente
 from src.memoria import Memoria
 
 class Entrenador:
-    def __init__(self, entorno_nombre="CartPole-v1", episodios=300, tamano_lote=64):
-        self.env = gym.make(entorno_nombre)
+    def __init__(self, entorno_nombre="CartPole-v1", episodios=150, tamano_lote=64):
+        try:
+            self.env = gym.make(entorno_nombre)
+        except Exception as e:
+            print(f"Error al inicializar el entorno de Gymnasium: {e}")
+            raise e
+            
         input_dim = self.env.observation_space.shape[0]
         n_actions = self.env.action_space.n
         self.episodios = episodios
@@ -21,6 +27,18 @@ class Entrenador:
 
     def entrenar(self):
         print("Iniciando el entrenamiento de la IA...")
+        ruta_modelo = "models/cerebro_cartpole.pth"
+        try:
+            if os.path.exists(ruta_modelo):
+                print(f"Modo Continuo: Cargando modelo desde {ruta_modelo}")
+                self.agente.cargar_modelo(ruta_modelo)
+                self.agente.probabilidad_aleatoria = 0.20 
+                for param_group in self.optimizador.param_groups:
+                    param_group['lr'] = 0.0005 
+            else:
+                print("Modo Novato: Empezando desde cero.")
+        except Exception as e:
+            print(f"Error al cargar el modelo previo. Detalles: {e}")
         
         for episodio in range(self.episodios):
             estado, _ = self.env.reset()
@@ -37,7 +55,6 @@ class Entrenador:
                     recompensa = -10
 
                 self.memoria.guardar_recuerdo(estado, accion, recompensa, siguiente_estado, terminado)
-
                 self.aprender_de_memoria()
                 
                 estado = siguiente_estado
@@ -45,13 +62,30 @@ class Entrenador:
 
             self.agente.actualizar_probabilidad_aleatoria()
             self.historial_puntos.append(puntos)
+            if len(self.historial_puntos) >= 10:
+                ultimos_10 = self.historial_puntos[-10:]
+                if sum(ultimos_10) == 5000:
+                    print(f"El agente ha alcanzado la perfección. Deteniendo el entrenamiento en el episodio {episodio + 1} para evitar sobreajuste.")
+                    break
 
             if (episodio + 1) % 10 == 0:
-                print(f"Episodio {episodio + 1}/{self.episodios} | Puntos: {puntos} {self.agente.probabilidad_aleatoria:.2f}")
+                print(f"Episodio {episodio + 1}/{self.episodios} | Puntos: {puntos} | Aleatoriedad: {self.agente.probabilidad_aleatoria:.2f}")
 
         print("¡Entrenamiento finalizado!")
-        self.agente.guardar_modelo("cerebro_cartpole.pth")
-        self.dibujar_grafica()
+        
+        try:
+            if not os.path.exists("models"):
+                os.makedirs("models")
+            self.agente.guardar_modelo("models/cerebro_cartpole.pth")
+            print("Modelo guardado exitosamente.")
+        except Exception as e:
+            print(f"Error al guardar el modelo entrenado: {e}")
+            
+        try:
+            self.dibujar_grafica()
+        except Exception as e:
+            print(f"No se pudo generar la gráfica de aprendizaje: {e}")
+            
         self.env.close()
 
     def aprender_de_memoria(self):
@@ -59,32 +93,24 @@ class Entrenador:
             return 
 
         lote = self.memoria.sacar_recuerdos_aleatorios(self.tamano_lote)
-
         estados = torch.FloatTensor([experiencia[0] for experiencia in lote])
         acciones = torch.LongTensor([experiencia[1] for experiencia in lote]).unsqueeze(1)
         recompensas = torch.FloatTensor([experiencia[2] for experiencia in lote])
         siguientes_estados = torch.FloatTensor([experiencia[3] for experiencia in lote])
         terminados = torch.FloatTensor([experiencia[4] for experiencia in lote])
-
         q_valores_actuales = self.agente.cerebro(estados).gather(1, acciones).squeeze(1)
         q_valores_siguientes = self.agente.cerebro(siguientes_estados).max(1)[0]
-
         q_valores_objetivo = recompensas + (0.99 * q_valores_siguientes * (1 - terminados))
-
         error = self.funcion_perdida(q_valores_actuales, q_valores_objetivo.detach())
-        
         self.optimizador.zero_grad()
         error.backward()
         self.optimizador.step()
 
     def dibujar_grafica(self):
+        plt.clf()
         plt.plot(self.historial_puntos)
         plt.title('Curva de Aprendizaje de la IA')
         plt.xlabel('Episodios jugados')
         plt.ylabel('Puntos (Frames en pie)')
         plt.savefig('grafica_aprendizaje.png')
         print("Gráfica guardada como 'grafica_aprendizaje.png'")
-
-if __name__ == "__main__":
-    entrenador = Entrenador(episodios=100)
-    entrenador.entrenar()
